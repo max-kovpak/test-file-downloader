@@ -19,7 +19,11 @@ class CreateFilesTable extends Migration
             $table->text('url');
             $table->text('path')->nullable();
             $table->string('status');
-
+            $table->string('real_name')->nullable();
+            $table->string('ext')->nullable();
+            $table->integer('size')->nullable();
+            $table->string('mime_type')->nullable();
+            
             $table->timestamps();
         });
     }
