@@ -65,12 +65,9 @@ class FileDownloader implements FileDownloaderInterface
             throw new FileNotAvailableException(sprintf('File "%s" is not available.', $url));
         }
 
-        //@todo get file name
-        $res->getHeaderLine('');
-
         $realFileName = null;
         if (!empty($contentDisposition = $res->getHeaderLine('Content-Disposition'))) {
-            preg_match('/filename="(.*)"/', $contentDisposition, $matches);
+            preg_match('/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/', $contentDisposition, $matches);
             $realFileName = data_get($matches, '1');
         }
 
