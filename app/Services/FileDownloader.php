@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Interfaces\FileDownloaderInterface;
 use App\Interfaces\FilesManagerInterface;
+use App\Interfaces\TmpFileInterface;
+use App\Utils\TmpFile;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Http\File;
 use App\DTO\UploadedFile;
 use App\Exceptions\FileNotAvailableException;
 use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class FileDownloader.
@@ -44,50 +47,40 @@ class FileDownloader implements FileDownloaderInterface
             throw new FileNotAvailableException(sprintf('File "%s" is not available.', $url));
         }
 
-        $tmpFile = tempnam(sys_get_temp_dir(), 'fileDownloader_');
-        $handle = fopen($tmpFile, 'w');
-
-        $client = new Client([
-            RequestOptions::VERIFY  => false,
-            RequestOptions::TIMEOUT => $timeout,
-            RequestOptions::SINK    => $handle,
-            RequestOptions::HEADERS => [
-                'User-Agent' => self::USER_AGENT
-            ]
-        ]);
+        $tmpFile = $this->createTmpFile();
+        $client = $this->createClient();
 
         try {
-            $res = $client->get($url);
+            $res = $client->get(
+                $url,
+                [
+                    RequestOptions::SINK    => $tmpFile->getResource(),
+                    RequestOptions::TIMEOUT => $timeout
+                ]
+            );
         } catch (RequestException $e) {
-            fclose($handle);
-            @unlink($tmpFile);
+            $tmpFile->close();
 
             throw new FileNotAvailableException(sprintf('File "%s" is not available.', $url));
         }
 
-        $realFileName = null;
-        if (!empty($contentDisposition = $res->getHeaderLine('Content-Disposition'))) {
-            preg_match('/filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)/', $contentDisposition, $matches);
-            $realFileName = data_get($matches, '1');
-        }
+        $realFileName = $this->parseFilenameFromContentDisposition($res->getHeaderLine('Content-Disposition'));
 
         $filePath = $this->fm->writeStream(
-            $handle
+            $tmpFile->getResource()
         );
 
-        $file = new File($tmpFile);
-
-        $ext = $file->guessExtension();
-        $uploadedFile = new UploadedFile(
+        $file = $tmpFile->getFile();
+        $uploadedFile = $this->createUploadedFile(
             $url,
             $filePath,
-            $realFileName ?? $file->getBasename(),
-            $ext,
+            $realFileName,
+            $file->guessExtension(),
             $file->getMimeType(),
             $file->getSize()
         );
 
-        @unlink($tmpFile);
+        $tmpFile->close();
 
         return $uploadedFile;
     }
@@ -97,24 +90,98 @@ class FileDownloader implements FileDownloaderInterface
      */
     public function isDownloadable(string $url): bool
     {
-        $client = new Client([
-            RequestOptions::VERIFY  => false,
-            RequestOptions::TIMEOUT => 10,
-            RequestOptions::HEADERS => [
-                'User-Agent' => self::USER_AGENT
-            ],
-        ]);
+        $client = $this->createClient();
 
         try {
-            $response = $client->get($url, [
-                'curl' => [
-                    CURLOPT_NOBODY => true
+            $response = $client->get(
+                $url,
+                [
+                    RequestOptions::TIMEOUT => 30,
+                    'curl'                  => [
+                        CURLOPT_NOBODY => true
+                    ]
                 ]
-            ]);
+            );
         } catch (RequestException $e) {
             return false;
         }
 
-        return 200 == $response->getStatusCode();
+        return Response::HTTP_OK == $response->getStatusCode();
+    }
+
+    /**
+     * Create TmpFileInterface instance.
+     *
+     * @return TmpFileInterface
+     */
+    public function createTmpFile(): TmpFileInterface
+    {
+        return new TmpFile();
+    }
+
+    /**
+     * Create UploadedFile instance.
+     *
+     * @param string $url
+     * @param string $path
+     * @param string $name
+     * @param string $ext
+     * @param string $mimeType
+     * @param int    $size
+     *
+     * @return UploadedFile
+     */
+    protected function createUploadedFile(
+        string $url = null,
+        string $path = null,
+        string $name = null,
+        string $ext = null,
+        string $mimeType = null,
+        int    $size = null
+    ) {
+        return new UploadedFile(
+            $url,
+            $path,
+            $name,
+            $ext,
+            $mimeType,
+            $size
+        );
+    }
+
+    /**
+     * Parse Content-Disposition header and return file name.
+     *
+     * @param string $contentDisposition
+     *
+     * @return string
+     */
+    protected function parseFilenameFromContentDisposition(string $contentDisposition): string
+    {
+        $fileName = '';
+        if (!empty($contentDisposition)) {
+            preg_match('/filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)/', $contentDisposition, $matches);
+            $fileName = data_get($matches, '1', '');
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * Create Guzzle Client instance.
+     *
+     * @return Client
+     */
+    protected function createClient()
+    {
+        return new Client(
+            [
+                RequestOptions::VERIFY  => false,
+                RequestOptions::TIMEOUT => 30,
+                RequestOptions::HEADERS => [
+                    'User-Agent' => self::USER_AGENT
+                ],
+            ]
+        );
     }
 }

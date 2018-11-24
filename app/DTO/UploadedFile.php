@@ -44,8 +44,14 @@ class UploadedFile
      * @param string $mimeType
      * @param int    $size
      */
-    public function __construct(string $url, string $path, string $name, string $ext, string $mimeType, int $size)
-    {
+    public function __construct(
+        string $url = null,
+        string $path = null,
+        string $name = null,
+        string $ext = null,
+        string $mimeType = null,
+        int $size = null
+    ) {
         $this->url = $url;
         $this->path = $path;
         $this->name = $name;
@@ -57,7 +63,7 @@ class UploadedFile
     /**
      * @return string
      */
-    public function getUrl(): string
+    public function getUrl()
     {
         return $this->url;
     }
@@ -73,7 +79,7 @@ class UploadedFile
     /**
      * @return string
      */
-    public function getPath(): string
+    public function getPath()
     {
         return $this->path;
     }
@@ -89,7 +95,7 @@ class UploadedFile
     /**
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -105,7 +111,7 @@ class UploadedFile
     /**
      * @return string
      */
-    public function getExt(): string
+    public function getExt()
     {
         return $this->ext;
     }
@@ -121,7 +127,7 @@ class UploadedFile
     /**
      * @return string
      */
-    public function getMimeType(): string
+    public function getMimeType()
     {
         return $this->mimeType;
     }
@@ -137,7 +143,7 @@ class UploadedFile
     /**
      * @return int
      */
-    public function getSize(): int
+    public function getSize()
     {
         return $this->size;
     }

@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\File;
 use App\Interfaces\FileDownloaderInterface;
 use Illuminate\Console\Command;
+use App\Jobs\DownloadFile as DownloadFileJob;
 
 class DownloadFile extends Command
 {
@@ -29,17 +31,27 @@ class DownloadFile extends Command
      */
     public function handle()
     {
-        $fd = app(FileDownloaderInterface::class);
         $url = $this->argument('url');
 
-        if (empty($url)) {
-            throw new \InvalidArgumentException('URL is required');
+        $validator = \Validator::make(
+            ['url' => $url],
+            ['url' => 'url']
+        );
+
+        if ($validator->fails()) {
+            $this->error(implode("\n", $validator->messages()->all()));
+
+            return;
         }
 
-        //@todo put a job to queue
+        $file = new File();
+        $file->fill([
+            'status' => File::STATUS_QUEUED,
+            'url'    => $url
+        ])->save();
 
-        $file = $fd->download($url);
+        DownloadFileJob::dispatch($file);
 
-        dd($file);
+        $this->line('File was queued for downloading.');
     }
 }

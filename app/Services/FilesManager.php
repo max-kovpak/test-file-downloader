@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Interfaces\FilesManagerInterface;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Http\File;
 
 /**
  * {@inheritdoc}
@@ -28,7 +29,11 @@ class FilesManager implements FilesManagerInterface
      */
     public function writeStream($resource, string $path = ''): string
     {
-        $fileName = md5(microtime(true)).(!empty($ext) ? '.'.$ext : '');
+        $metaData = stream_get_meta_data($resource);
+        $file = new File($metaData["uri"]);
+        $ext = $file->guessExtension();
+
+        $fileName = md5(microtime(true)).'.'.($ext || 'undefined');
 
         $path = '/' === substr($path, strlen($path), strlen($path)-1) ? substr($path, 0, strlen($path)-1) : $path;
         $path = $path
