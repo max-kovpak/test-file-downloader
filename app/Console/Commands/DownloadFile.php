@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\File;
 use App\Interfaces\FileDownloaderInterface;
+use App\Repositories\FileRepository;
 use Illuminate\Console\Command;
 use App\Jobs\DownloadFile as DownloadFileJob;
 
@@ -44,11 +45,7 @@ class DownloadFile extends Command
             return;
         }
 
-        $file = new File();
-        $file->fill([
-            'status' => File::STATUS_QUEUED,
-            'url'    => $url
-        ])->save();
+        $file = app(FileRepository::class)->create($url);
 
         DownloadFileJob::dispatch($file);
 

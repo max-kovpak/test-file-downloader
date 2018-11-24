@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Exceptions\FileNotAvailableException;
 use App\File;
 use App\Interfaces\FileDownloaderInterface;
+use App\Repositories\FileRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -36,24 +37,17 @@ class DownloadFile implements ShouldQueue
      * Execute the job.
      *
      * @param FileDownloaderInterface $fd
+     * @param FileRepository          $repo
      *
      * @return void
      */
-    public function handle(FileDownloaderInterface $fd)
+    public function handle(FileDownloaderInterface $fd, FileRepository $repo)
     {
         try {
             $uploadedFile = $fd->download($this->file->url);
-            $status = File::STATUS_SUCCESS;
+            $repo->success($this->file, $uploadedFile);
         } catch (FileNotAvailableException $e) {
-            $status = File::STATUS_ERROR;
+            $repo->error($this->file);
         }
-
-        $this->file->update([
-            'real_name' => $uploadedFile->getName(),
-            'mime_type' => $uploadedFile->getMimeType(),
-            'size'      => $uploadedFile->getSize(),
-            'ext'       => $uploadedFile->getExt(),
-            'status'    => $status
-        ]);
     }
 }

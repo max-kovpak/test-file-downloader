@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Interfaces\FileDownloaderInterface;
 use App\Interfaces\FilesManagerInterface;
+use App\Repositories\FileRepository;
 use App\Services\FileDownloader;
 use App\Services\FilesManager;
 use Illuminate\Support\ServiceProvider;
@@ -32,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(FileDownloaderInterface::class, FileDownloader::class);
+        $this->app->singleton(FileRepository::class, FileRepository::class);
     }
 }
