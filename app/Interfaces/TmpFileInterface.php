@@ -14,6 +14,13 @@ interface TmpFileInterface
     public function getResource();
 
     /**
+     * Get tmp file path.
+     *
+     * @return string
+     */
+    public function getPath();
+
+    /**
      * Get File.
      *
      * @return File

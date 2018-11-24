@@ -34,12 +34,16 @@ class TmpFile implements TmpFileInterface
     /**
      * {@inheritdoc}
      */
+    public function getPath()
+    {
+        return $this->filePath;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getResource()
     {
-        if (!is_resource($this->resource) || feof($this->resource)) {
-            $this->resource = fopen($this->filePath, 'w');
-        }
-
         return $this->resource;
     }
 
@@ -56,7 +60,7 @@ class TmpFile implements TmpFileInterface
      */
     public function close()
     {
-        fclose($this->resource);
+        @fclose($this->resource);
         @unlink($this->filePath);
     }
 }

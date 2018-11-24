@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\FilesManagerInterface;
+use App\Interfaces\TmpFileInterface;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\File;
 
@@ -27,13 +28,15 @@ class FilesManager implements FilesManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function writeStream($resource, string $path = ''): string
+    public function put(TmpFileInterface $file, string $path = ''): string
     {
-        $metaData = stream_get_meta_data($resource);
-        $file = new File($metaData["uri"]);
-        $ext = $file->guessExtension();
+        $ext = (new File($file->getPath()))->extension();
+        $content = $file->getResource();
+        if (!is_resource($content) || feof($content)) {
+            $content = file_get_contents($file->getPath());
+        }
 
-        $fileName = md5(microtime(true)).'.'.($ext || 'undefined');
+        $fileName = md5(microtime(true)).'.'.$ext;
 
         $path = '/' === substr($path, strlen($path), strlen($path)-1) ? substr($path, 0, strlen($path)-1) : $path;
         $path = $path
@@ -50,7 +53,7 @@ class FilesManager implements FilesManagerInterface
             . DIRECTORY_SEPARATOR
             . $fileName;
 
-        $this->fs->writeStream($filePath, $resource);
+        $this->fs->put($filePath, $content);
 
         return $filePath;
     }

@@ -64,11 +64,10 @@ class FileDownloader implements FileDownloaderInterface
             throw new FileNotAvailableException(sprintf('File "%s" is not available.', $url));
         }
 
-        $realFileName = $this->parseFilenameFromContentDisposition($res->getHeaderLine('Content-Disposition'));
+        $cdHeader = $res->getHeaderLine('Content-Disposition');
+        $realFileName = $this->parseFilenameFromContentDisposition($cdHeader);
 
-        $filePath = $this->fm->writeStream(
-            $tmpFile->getResource()
-        );
+        $filePath = $this->fm->put($tmpFile);
 
         $file = $tmpFile->getFile();
         $uploadedFile = $this->createUploadedFile(

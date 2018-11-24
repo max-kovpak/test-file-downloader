@@ -22,10 +22,10 @@ interface FilesManagerInterface
     /**
      * Create new file from a stream.
      *
-     * @param resource $resource
-     * @param string   $path
+     * @param TmpFileInterface $file
+     * @param string           $path
      *
      * @return string
      */
-    public function writeStream($resource, string $path = ''): string;
+    public function put(TmpFileInterface $file, string $path = ''): string;
 }
