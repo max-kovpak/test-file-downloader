@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\DTO\UploadedFile;
 use App\Exceptions\FileNotAvailableException;
 use App\Interfaces\TmpFileInterface;
 use App\Services\FileDownloader;
@@ -33,6 +34,7 @@ class FileDownloaderTest extends TestCase
 
         $uploadedFile = $fd->download('https://s.gravatar.com/avatar/9ec4a7300ccf8fda2a5a25af3bf898be?s=200');
 
+        $this->assertInstanceOf(UploadedFile::class, $uploadedFile);
         $this->assertTrue($disk->exists($uploadedFile->getPath()));
 
         $disk->delete($uploadedFile->getPath());
