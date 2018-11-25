@@ -3,7 +3,7 @@
 namespace App\Interfaces;
 
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Http\File;
+use App\File;
 
 /**
  * Interface FilesManagerInterface
@@ -28,4 +28,13 @@ interface FilesManagerInterface
      * @return string
      */
     public function put(TmpFileInterface $file, string $path = ''): string;
+
+    /**
+     * Get URL to the file.
+     *
+     * @param File $file
+     *
+     * @return string|null
+     */
+    public function getUrl(File $file);
 }

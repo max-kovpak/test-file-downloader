@@ -43,11 +43,13 @@ class DownloadFile implements ShouldQueue
      */
     public function handle(FileDownloaderInterface $fd, FileRepository $repo)
     {
+        $repo->updateStatus($this->file, File::STATUS_DOWNLOADING);
+
         try {
             $uploadedFile = $fd->download($this->file->url);
-            $repo->success($this->file, $uploadedFile);
+            $repo->complete($this->file, $uploadedFile);
         } catch (FileNotAvailableException $e) {
-            $repo->error($this->file);
+            $repo->updateStatus($this->file, File::STATUS_ERROR);
         }
     }
 }

@@ -18,7 +18,7 @@ class FileRepository
     {
         $file = new File();
         $file->fill([
-            'status' => File::STATUS_QUEUED,
+            'status' => File::STATUS_PENDING,
             'url'    => $url
         ])->save();
 
@@ -33,28 +33,30 @@ class FileRepository
      *
      * @return void
      */
-    public function success(File $file, UploadedFile $uploadedFile)
+    public function complete(File $file, UploadedFile $uploadedFile)
     {
         $file->update([
             'real_name' => $uploadedFile->getName(),
             'mime_type' => $uploadedFile->getMimeType(),
             'size'      => $uploadedFile->getSize(),
             'ext'       => $uploadedFile->getExt(),
-            'status'    => File::STATUS_SUCCESS
+            'status'    => File::STATUS_COMPLETE,
+            'path'      => $uploadedFile->getPath(),
         ]);
     }
 
     /**
-     * Set error status.
+     * Update file status.
      *
-     * @param File $file
+     * @param File   $file
+     * @param string $status File::STATUS_*
      *
      * @return void
      */
-    public function error(File $file)
+    public function updateStatus(File $file, string $status)
     {
         $file->update([
-            'status'    => File::STATUS_ERROR
+            'status'    => $status
         ]);
     }
 }

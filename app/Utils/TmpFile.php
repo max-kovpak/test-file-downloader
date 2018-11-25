@@ -28,7 +28,7 @@ class TmpFile implements TmpFileInterface
     public function __construct()
     {
         $this->filePath = tempnam(sys_get_temp_dir(), 'fileDownloader_');
-        $this->resource = fopen($this->filePath, 'w');
+        $this->resource = fopen($this->filePath, 'w+');
     }
 
     /**

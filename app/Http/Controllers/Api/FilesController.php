@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\File;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FileStoreRequest;
+use App\Http\Resources\FileResource;
 use App\Jobs\DownloadFile;
 use App\Repositories\FileRepository;
-use Illuminate\Http\Response;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class FilesController extends Controller
 {
@@ -25,27 +27,27 @@ class FilesController extends Controller
     }
 
     /**
-     * @return Response
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
-        return response()->json(File::all());
+        return FileResource::collection(File::orderBy('id', 'desc')->get());
     }
 
     /**
      * @param File $file
      *
-     * @return Response
+     * @return FileResource
      */
     public function show(File $file)
     {
-        return response()->json($file);
+        return new FileResource($file);
     }
 
     /**
      * @param FileStoreRequest $request
      *
-     * @return Response
+     * @return FileResource
      */
     public function store(FileStoreRequest $request)
     {
@@ -53,6 +55,6 @@ class FilesController extends Controller
 
         DownloadFile::dispatch($file);
 
-        return response()->json($file);
+        return response()->json(new FileResource($file), Response::HTTP_CREATED);
     }
 }

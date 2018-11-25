@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\File;
-use App\Interfaces\FileDownloaderInterface;
 use App\Repositories\FileRepository;
 use Illuminate\Console\Command;
 use App\Jobs\DownloadFile as DownloadFileJob;
@@ -15,7 +13,7 @@ class DownloadFile extends Command
      *
      * @var string
      */
-    protected $signature = 'app:download-file
+    protected $signature = 'app:file:download
                             {url : URL to the file.}';
 
     /**

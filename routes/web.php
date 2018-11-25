@@ -11,6 +11,5 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'IndexController@index')->name('app.index');
+Route::get('/files', 'IndexController@files')->name('app.files');

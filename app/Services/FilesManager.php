@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Interfaces\FilesManagerInterface;
 use App\Interfaces\TmpFileInterface;
+use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\File;
+use App\File as FileModel;
 
 /**
  * {@inheritdoc}
@@ -40,9 +42,9 @@ class FilesManager implements FilesManagerInterface
 
         $path = '/' === substr($path, strlen($path), strlen($path)-1) ? substr($path, 0, strlen($path)-1) : $path;
         $path = $path
-            . DIRECTORY_SEPARATOR
+            . '/'
             . substr($fileName, 0, 2)
-            . DIRECTORY_SEPARATOR
+            . '/'
             . substr($fileName, 4, 2);
 
         if (!$this->fs->exists($path)) {
@@ -50,11 +52,27 @@ class FilesManager implements FilesManagerInterface
         }
 
         $filePath = $path
-            . DIRECTORY_SEPARATOR
+            . '/'
             . $fileName;
 
         $this->fs->put($filePath, $content);
 
         return $filePath;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUrl(FileModel $file)
+    {
+        if (empty($file->path) || !$this->fs->exists($file->path)) {
+            return null;
+        }
+
+        if ($this->fs instanceof Cloud) {
+            return $this->fs->url($file->path);
+        } else {
+            return asset('storage/'.$file->path);
+        }
     }
 }
