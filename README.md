@@ -5,7 +5,7 @@
 - clone code & go to the project dir
 - `$ composer install`
 - `$ touch ./database/database.sqlite`
-- `$ php -r \"file_exists('.env') || copy('.env.example', '.env');\"`
+- `$ php -r "file_exists('.env') || copy('.env.example', '.env');"`
 - `$ php artisan key:generate --ansi`
 - `$ php artisan migrate`
 - `$ php artisan serve`
