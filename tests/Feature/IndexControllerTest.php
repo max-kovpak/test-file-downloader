@@ -8,13 +8,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class IndexControllerTest extends TestCase
 {
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testExample()
+    public function testIndex()
     {
-        $this->assertTrue(true);
+        $res = $this->get('/');
+
+        $res->assertStatus(200);
+    }
+
+    public function testFiles()
+    {
+        $res = $this->get('/files');
+
+        $res->assertStatus(200);
     }
 }

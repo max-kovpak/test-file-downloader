@@ -41,7 +41,7 @@ class FilesController extends Controller
      */
     public function show(File $file)
     {
-        return new FileResource($file);
+        return response()->json(new FileResource($file));
     }
 
     /**
