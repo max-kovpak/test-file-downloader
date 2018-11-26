@@ -34,7 +34,7 @@ class TmpFile implements TmpFileInterface
     /**
      * {@inheritdoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->filePath;
     }
@@ -50,7 +50,7 @@ class TmpFile implements TmpFileInterface
     /**
      * {@inheritdoc}
      */
-    public function getFile()
+    public function getFile(): File
     {
         return new File($this->filePath);
     }

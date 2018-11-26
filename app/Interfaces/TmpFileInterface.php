@@ -18,14 +18,14 @@ interface TmpFileInterface
      *
      * @return string
      */
-    public function getPath();
+    public function getPath(): string;
 
     /**
      * Get File.
      *
      * @return File
      */
-    public function getFile();
+    public function getFile(): File;
 
     /**
      * Close resource and remove tmp file.
